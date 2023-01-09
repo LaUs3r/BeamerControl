@@ -16,11 +16,11 @@ from datetime import datetime
 Builder.load_string("""
 <MyBoxLayout>:
     id: root_layout
-    
+
     BoxLayout:
         size: root.size
         pos: root.pos
-        
+
         orientation: 'vertical'
         Label:
             text: 'BeamerControl'
@@ -30,11 +30,11 @@ Builder.load_string("""
             halign:  'center'
             valign: 'top'
             #size_hint: 1, .1
-        
+
         GridLayout:
             cols: 2
             rows: 1
-            
+
             Label:
                 text_size: self.size
                 text: 'connection status: '
@@ -43,7 +43,7 @@ Builder.load_string("""
                 halign:  'left'
                 valign: 'top'
                 size_hint: 1, .1
-                
+
             Label:
                 id: idConnStatus
                 text_size: self.size
@@ -60,7 +60,7 @@ Builder.load_string("""
             halign: 'center'
             valign: 'top'
             size_hint: 1, .08
-        
+
         GridLayout:
             cols: 2
             rows: 1
@@ -74,15 +74,17 @@ Builder.load_string("""
                 font_size: 30
                 background_color: 1, 0, 0, 1
                 on_press: root.press_off()
-                
+
 """)
 
 strConnectionStatus = 'initiated'
+strIpAddress = ''
 rootLayout = None
 
-class BeamerControl():
 
+class BeamerControl():
     global strConnectionStatus
+    global strIpAddress
 
     def powerOn(self, *args):
         print('Power ON')
@@ -94,7 +96,8 @@ class BeamerControl():
                 sock.settimeout(5)
 
                 # Connect to the beamer
-                sock.connect(('192.168.100.5', 20554))
+
+                sock.connect((strIpAddress, 20554))
                 data = sock.recv(1024)
                 sock.send(b'PJREQ')
 
@@ -119,7 +122,7 @@ class BeamerControl():
                 sock.settimeout(5)
 
                 # Connect to the beamer
-                sock.connect(('192.168.100.5', 20554))
+                sock.connect((strIpAddress, 20554))
                 data = sock.recv(1024)
                 sock.send(b'PJREQ')
 
@@ -131,7 +134,6 @@ class BeamerControl():
 
         except socket.timeout:
             print('Timeout!')
-
 
     def checkConnection(self, *args):
         print(datetime.now().strftime("%H:%M:%S"), ' :Connection check')
@@ -145,7 +147,7 @@ class BeamerControl():
             sock.settimeout(5)
 
             # Connect to the beamer
-            sock.connect(('192.168.100.5', 20554))
+            sock.connect((strIpAddress, 20554))
 
             # Wait for the PJ_OK packet
             data = sock.recv(1024)
@@ -192,7 +194,9 @@ class BeamerControl():
 
 class MyBoxLayout(Widget):
     global strConnectionStatus
+    global strIpAddress
     txtConnectionStatus = strConnectionStatus
+    strIpAddress = '192.168.100.5'
 
     def __init__(self, **kwargs):
         super(MyBoxLayout, self).__init__(**kwargs)
@@ -207,11 +211,8 @@ class MyBoxLayout(Widget):
         BeamerControl.powerOn(self)
 
 
-
-
 class BeamerControlApp(App):
     global strConnectionStatus
-
 
     def build(self):
         self.title = 'BeamerControl'
